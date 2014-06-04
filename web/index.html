@@ -8,8 +8,8 @@
 </head>
 <body>
   <div class="login-form">
+    Please enter details
     <form id='authy-reg' method="POST">
-      <h3>Enable Two-Factor Authentication</h3>
       Country:
       <select id="authy-countries" name="country-code"></select>
       <br/>
@@ -19,14 +19,6 @@
   </div>
   <script src="/authy-src/form.authy.js"></script>
   <script type='text/javascript'>
-        var test = {
-            url:'http://sandbox-api.authy.com',
-            key:'591b17780a53fb9872ec1f17f49e4fff'
-        }
-        var prod = {
-            url:'https://api.authy.com',
-            key:'f6e1b0c0898c4abba10b002034220fa3'
-        }
         var authy = {
             success:function(resp) {
                 console.log("Success",resp)
@@ -35,20 +27,20 @@
                 console.log("Error",resp)
             }
         }
-        var form = $('#authy-reg');
-        form.submit(function(e) {
-        e.preventDefault();
-        var params = form.serializeArray();
-        console.log(params)
-        $.ajax({
-            url:prod.url+'/protected/json/phones/verification/start?api_key='+prod.key,
-            data:{via:'sms',phone_number:params[0].value,country_code:params[1].value},
-            type:'POST',
-            crossDomain:'true',
-            dataType:'json',
-            success:authy.success,
-            error:authy.error
-        })
+        $(window).ready(function() {
+            var form = $('#authy-reg');
+            form.submit(function(e) {
+            e.preventDefault();
+            var params = form.serializeArray();
+            console.log(params)
+            $.ajax({
+                url:'/auth/phone',
+                data:{via:'sms',phone_number:params[0].value,country_code:params[1].value},
+                type:'POST',
+                success:authy.success,
+                error:authy.error
+            })
+            })
         })
   </script>
 </body>
