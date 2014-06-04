@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+    <script src='/js/jquery-2.1.1.min.js' type='text/javascript'></script>  
+    <link href="/authy-src/sample.css" media="screen" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/authy-src/flags.authy.css">
+    <link rel="stylesheet" href="/authy-src/form.authy.css">
+</head>
+<body>
+  <div class="login-form">
+    <form id='authy-reg' method="POST">
+      <h3>Enable Two-Factor Authentication</h3>
+      Country:
+      <select id="authy-countries" name="country-code"></select>
+      <br/>
+      Cellphone: <input id="authy-cellphone" type="text" value="" name="authy-cellphone" />
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+  <script src="/authy-src/form.authy.js"></script>
+  <script type='text/javascript'>
+        var test = {
+            url:'http://sandbox-api.authy.com',
+            key:'591b17780a53fb9872ec1f17f49e4fff'
+        }
+        var prod = {
+            url:'https://api.authy.com',
+            key:'f6e1b0c0898c4abba10b002034220fa3'
+        }
+        var authy = {
+            success:function(resp) {
+                console.log("Success",resp)
+            },
+            error: function(resp) {
+                console.log("Error",resp)
+            }
+        }
+        var form = $('#authy-reg');
+        form.submit(function(e) {
+        e.preventDefault();
+        var params = form.serializeArray();
+        console.log(params)
+        $.ajax({
+            url:prod.url+'/protected/json/phones/verification/start?api_key='+prod.key,
+            data:{via:'sms',phone_number:params[0].value,country_code:params[1].value},
+            type:'POST',
+            crossDomain:'true',
+            dataType:'json',
+            success:authy.success,
+            error:authy.error
+        })
+        })
+  </script>
+</body>
+</html>
