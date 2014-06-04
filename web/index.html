@@ -7,39 +7,74 @@
     <link rel="stylesheet" href="/authy-src/form.authy.css">
 </head>
 <body>
-  <div class="login-form">
-    Please enter details
-    <form id='authy-reg' method="POST">
-      Country:
-      <select id="authy-countries" name="country-code"></select>
+    <div class="login-form">
+        Please enter details
+        <form id='authy-reg' method="POST">
+            Country:
+            <select id="authy-countries" name="country-code"></select>
+            <br/>
+            Cellphone: <input id="authy-cellphone" type="text" value="" name="authy-cellphone" />
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <img id='successcat' style='display:none;' src='/img/cat-saying-hooray_thumb.jpg'>
+  <div class="login-form" id='authy-token-form-container'>
+    <form method="POST" id='authy-token-form'>
+      <h3>Token Verification</h3>
+      Token: <input id="authy-token" name="authy-token" type="text" value=""/>
       <br/>
-      Cellphone: <input id="authy-cellphone" type="text" value="" name="authy-cellphone" />
-      <button type="submit">Submit</button>
+            <button type="submit">Submit</button>
+      <a href="#" id="authy-help">help</a>
     </form>
   </div>
-  <script src="/authy-src/form.authy.js"></script>
-  <script type='text/javascript'>
+    <script src="/authy-src/form.authy.js"></script>
+    <script type='text/javascript'>
         var authy = {
             success:function(resp) {
                 console.log("Success",resp)
+                $('#authy-token-form-container').show()
             },
             error: function(resp) {
                 console.log("Error",resp)
             }
         }
         $(window).ready(function() {
+            $('#authy-token-form-container').hide() 
             var form = $('#authy-reg');
             form.submit(function(e) {
-            e.preventDefault();
-            var params = form.serializeArray();
-            console.log(params)
-            $.ajax({
-                url:'/auth/phone',
-                data:{via:'sms',phone_number:params[0].value,country_code:params[1].value},
-                type:'POST',
-                success:authy.success,
-                error:authy.error
+                e.preventDefault();
+                var params = form.serializeArray();
+                console.log(params)
+                $.ajax({
+                    url:'/auth/phone',
+                    data:{via:'sms',phone_number:params[0].value,country_code:params[1].value},
+                    type:'POST',
+                    success:authy.success,
+                    error:authy.error
+                })
             })
+            var token = {
+                success:function(resp) {
+                    console.log("Token Success",resp)
+                    $('img#successcat').show();
+                },
+                error: function(resp) {
+                    console.log("Token Error",resp)
+                }
+            }
+            var tokenform = $('#authy-token-form')
+            tokenform.submit(function(e) {
+                e.preventDefault();
+                var params = tokenform.serializeArray();
+                console.log(params)
+                var details = $('#authy-reg').serializeArray();
+                $.ajax({
+                    url:'/auth/phone/validate',
+                    data:{token:params[0].value,phone_number:details[0].value,country_code:details[1].value},
+                    type:'POST',
+                    success:token.success,
+                    error:token.error
+                })
             })
         })
   </script>
